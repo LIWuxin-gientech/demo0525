@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.Mapper.UserMapper">
+
+    <select id="findById" parameterType="long" resultType="User">
+        SELECT
+            id,
+            name,
+            email,
+            age,
+            status,
+            created_at,
+            updated_at
+        FROM users
+        WHERE id = #{id}
+    </select>
+
+    <select id="findAll" resultType="User">
+        SELECT
+            id,
+            name,
+            email,
+            age,
+            status,
+            created_at,
+            updated_at
+        FROM users
+        ORDER BY id ASC
+    </select>
+
+    <insert id="insert" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO users (
+            name,
+            email,
+            age,
+            status
+        ) VALUES (
+            #{name},
+            #{email},
+            #{age},
+            #{status}
+        )
+    </insert>
+
+    <update id="update" parameterType="User">
+        UPDATE users
+        SET
+            name = #{name},
+            email = #{email},
+            age = #{age},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM users
+        WHERE id = #{id}
+    </delete>
+
+    <!-- Search using @Param("name"), @Param("status") -->
+    <select id="searchUsers" resultType="User">
+        SELECT
+            id,
+            name,
+            email,
+            age,
+            status,
+            created_at,
+            updated_at
+        FROM users
+        WHERE 1 = 1
+        <if test="name != null and name != ''">
+            AND name LIKE CONCAT('%', #{name}, '%')
+        </if>
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+    </select>
+
+    <!-- Exercise: dynamic search using DTO -->
+    <select id="searchByCondition" parameterType="com.example.demo.dto.UserSearchCondition" resultType="User">
+        SELECT
+            id,
+            name,
+            email,
+            age,
+            status,
+            created_at,
+            updated_at
+        FROM users
+        <where>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="minAge != null">
+                AND age &gt;= #{minAge}
+            </if>
+            <if test="maxAge != null">
+                AND age &lt;= #{maxAge}
+            </if>
+        </where>
+        ORDER BY id
+    </select>
+
+    <!-- Exercise: find by multiple ids -->
+    <select id="findByIds" parameterType="list" resultType="User">
+        SELECT
+            id,
+            name,
+            email,
+            age,
+            status,
+            created_at,
+            updated_at
+        FROM users
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+</mapper>
